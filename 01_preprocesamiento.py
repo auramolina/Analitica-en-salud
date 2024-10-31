@@ -60,21 +60,25 @@ num_classes = 2 #clases variable respuesta
 trainpath = 'Data/train/'
 testpath = 'Data/test/'
 
-x_train, y_train = fn.img2data(trainpath) #Run in train
-x_test, y_test = fn.img2data(testpath) #Run in test
+x_test, y_test, names_train = fn.import_data(testpath)
+x_train, y_train, names_train = fn.import_data(trainpath) #Run in train
+
 
 # Verificar las formas de los datos
-x_train.shape
-x_test.shape
+print('Dimensiones de x_train:', x_train.shape)
+print('Dimensiones de y_train:', y_train.shape)
+print('Dimensiones de x_test:', x_test.shape)
+print('Dimensiones de y_test:', y_test.shape)
 
+img_prueba = x_train[0]
+plt.imshow(img_prueba)
+plt.title(str(names_train[0]) + ('\nBenign' if y_train[0][0] == 0 else 'Malignant'))
+print()
 
-np.prod(x_train[1].shape)
-y_train.shape
+x_train.min(), x_train.max()
 
-
-x_test.shape
-y_test.shape
-
+x_train = np.array(x_train).astype('float32') / 255
+x_test = np.array(x_test).astype('float32') / 255
 
 ####### salidas del preprocesamiento bases listas ######
 
