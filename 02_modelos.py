@@ -45,6 +45,11 @@ y_test = joblib.load('salidas\\y_test.pkl')
 
 ####################### RandomForest #######################
 
+x_train2=x_train.reshape(2637,30000)
+x_test2=x_test.reshape(660, 30000)
+x_train2.shape
+x_test2.shape
+
 rf = RandomForestClassifier()
 rf.fit(x_train2, y_train)
 
