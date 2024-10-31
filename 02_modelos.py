@@ -1,21 +1,16 @@
 import numpy as np
 import joblib 
-
-######## Paquetes para NN #########
+# Paquetes para NN 
 import tensorflow as tf
 from sklearn import metrics # para analizar modelo
 from sklearn.ensemble import RandomForestClassifier  # para analizar modelo
 import pandas as pd
-
 from sklearn import tree
-
 import cv2 # para leer imagenes jpeg
 ### pip install opencv-python
-
 from matplotlib import pyplot as plt #
 
 ### cargar bases_procesadas ####
-
 x_train = joblib.load('salidas\\x_train.pkl')
 y_train = joblib.load('salidas\\y_train.pkl')
 x_test = joblib.load('salidas\\x_test.pkl')
@@ -32,7 +27,7 @@ y_test = joblib.load('salidas\\y_test.pkl')
 ### Acurracy: Porcentaje de acertados
 ### AUC: detección de positivos vs mala clasificaicón de negativos: porcentaje de los que neumonía que identifico vs los normales que digo que tiene neumonía
 
-############Analisis problema ###########
+#################### Analisis problema ####################
 #### me interesa recall: de los enfermos que los pueda detectar, sin embargo
 #### el problema es que puede generar mucho trabajo porque clasifica a 
 ####la mayoria como con neumonía, entonces usaremos el AUC que mide la capacidad e clasificación de neumoinía en balance con los noramles mal calsificados 
@@ -84,18 +79,18 @@ fc_model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-##### configura el optimizador y la función para optimizar
+# configura el optimizador y la función para optimizar
 fc_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy','AUC', 'Recall', 'Precision'])
 
-##### Entrenar el modelo usando el optimizador y arquitectura definidas
+# Entrenar el modelo usando el optimizador y arquitectura definidas
 fc_model.fit(x_train, y_train, batch_size=100, epochs=10, validation_data=(x_test, y_test))
 
-##### Evaluar el modelo
+# Evaluar el modelo
 test_loss, test_acc, test_auc, test_recall, test_precision = fc_model.evaluate(x_test, y_test, verbose=2)
 print("Test auc:", test_auc)
 x_test.shape
 
-###### matriz de confusión test
+# matriz de confusión test
 pred_test = (fc_model.predict(x_test) > 0.50).astype('int')
 cm = metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
 disp = metrics.ConfusionMatrixDisplay(cm,display_labels=['Pneu', 'Normal'])
@@ -109,22 +104,15 @@ print(metrics.classification_report(y_test, pred_test))
 fc_model.save('path_to_my_model.h5') 
 
 
-
-
-
-######Ejercicio #######
-####usar red neuronal y predecir para las imágenes en la carpeta data\ejercicio_est la probabilidad de tener pneumonia
-
-
 #########################################################################################
 #########################################################################################
-###########Estrategias a usar: regilarization usar una a la vez para ver impacto
+######### Estrategias a usar: regilarization usar una a la vez para ver impacto #########
 #########################################################################################
-###############################################################
+#########################################################################################
 
-dropout_rate = 0.3 ## porcentaje de neuronas que elimina
+dropout_rate = 0.3 # porcentaje de neuronas que elimina
 
-fc_model2=tf.keras.models.Sequential([
+fc_model2 = tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=x_train.shape[1:]),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(dropout_rate),
@@ -132,25 +120,23 @@ fc_model2=tf.keras.models.Sequential([
     tf.keras.layers.Dropout(dropout_rate),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-##### configura el optimizador y la función para optimizar ##############
-
+# configura el optimizador y la función para optimizar 
 
 fc_model2.compile(optimizer='adam', loss='binary_crossentropy', metrics=['AUC'])
 
-
-#####Entrenar el modelo usando el optimizador y arquitectura definidas #########
+# Entrenar el modelo usando el optimizador y arquitectura definidas
 fc_model2.fit(x_train, y_train, batch_size=100, epochs=7, validation_data=(x_test, y_test))
 
 
-####################### aplicar dos regularizaciones L2 y drop out
-###Penaliza el tamaño de los pesos, mientras más grande la penalización menores son los valores de los coeficientes
+## aplicar dos regularizaciones L2 y drop out
+### Penaliza el tamaño de los pesos, mientras más grande la penalización menores son los valores de los coeficientes
 
 reg_strength = 0.001
 
-###########Estrategias a usar: regilarization usar una a la vez para ver impacto
-dropout_rate = 0.3 ## porcentaje de neuronas que utiliza 
+# Estrategias a usar: regilarization usar una a la vez para ver impacto
+dropout_rate = 0.3 # porcentaje de neuronas que utiliza 
 
-fc_model3=tf.keras.models.Sequential([
+fc_model3 = tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=x_train.shape[1:]),
     tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(reg_strength)),
     tf.keras.layers.Dropout(dropout_rate),
@@ -158,24 +144,19 @@ fc_model3=tf.keras.models.Sequential([
     tf.keras.layers.Dropout(dropout_rate),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-##### configura el optimizador y la función para optimizar ##############
-
-
+# configura el optimizador y la función para optimizar
 
 fc_model3.compile(optimizer='adam', loss='binary_crossentropy', metrics=['AUC'])
 
-#####Entrenar el modelo usando el optimizador y arquitectura definidas #########
+# Entrenar el modelo usando el optimizador y arquitectura definidas #########
 fc_model3.fit(x_train, y_train, batch_size=100, epochs=10, validation_data=(x_test, y_test))
 
-
-
-
-############# Disminuir el numero de neuronas a la mitad
+# Disminuir el numero de neuronas a la mitad
 
 reg_strength = 0.001
 
-###########Estrategias a usar: regilarization usar una a la vez para ver impacto
-dropout_rate = 0.3 ## porcentaje de neuronas que utiliza 
+# Estrategias a usar: regilarization usar una a la vez para ver impacto
+dropout_rate = 0.3 # porcentaje de neuronas que utiliza 
 
 fc_model4=tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=x_train.shape[1:]),
@@ -185,24 +166,19 @@ fc_model4=tf.keras.models.Sequential([
     tf.keras.layers.Dropout(dropout_rate),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-##### configura el optimizador y la función para optimizar ##############
-
-
+# configura el optimizador y la función para optimizar
 
 fc_model4.compile(optimizer='adam', loss='binary_crossentropy', metrics=['AUC'])
 
-
-#####Entrenar el modelo usando el optimizador y arquitectura definidas #########
+# Entrenar el modelo usando el optimizador y arquitectura definidas
 fc_model4.fit(x_train, y_train, batch_size=100, epochs=10, validation_data=(x_test, y_test))
-
-
 
 reg_strength = 0.001
 
-###########Estrategias a usar: regilarization usar una a la vez para ver impacto
-dropout_rate = 0.2 ## porcentaje de neuronas que utiliza 
+# Estrategias a usar: regilarization usar una a la vez para ver impacto
+dropout_rate = 0.2 # porcentaje de neuronas que utiliza 
 
-fc_model5=tf.keras.models.Sequential([
+fc_model5 = tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=x_train.shape[1:]),
     tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(reg_strength)),
     tf.keras.layers.Dropout(dropout_rate),
@@ -212,23 +188,19 @@ fc_model5=tf.keras.models.Sequential([
     tf.keras.layers.Dropout(dropout_rate),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-##### configura el optimizador y la función para optimizar ##############
-
-
+# configura el optimizador y la función para optimizar 
 
 fc_model5.compile(optimizer='adam', loss='binary_crossentropy', metrics=['AUC'])
 
-#####Entrenar el modelo usando el optimizador y arquitectura definidas #########
+# Entrenar el modelo usando el optimizador y arquitectura definidas 
 fc_model5.fit(x_train, y_train, batch_size=100, epochs=10, validation_data=(x_test, y_test))
-
-
 
 reg_strength = 0.001
 
-###########Estrategias a usar: regilarization usar una a la vez para ver impacto
-dropout_rate = 0.35 ## porcentaje de neuronas que utiliza 
+# Estrategias a usar: regilarization usar una a la vez para ver impacto
+dropout_rate = 0.35 # porcentaje de neuronas que utiliza 
 
-fc_model=tf.keras.models.Sequential([
+fc_model = tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=x_train.shape[1:]),
     tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(reg_strength)),
     tf.keras.layers.Dropout(dropout_rate),
@@ -236,11 +208,9 @@ fc_model=tf.keras.models.Sequential([
     tf.keras.layers.Dropout(dropout_rate),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-##### configura el optimizador y la función para optimizar ##############
-
-
+# configura el optimizador y la función para optimizar
 
 fc_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['AUC'])
 
-#####Entrenar el modelo usando el optimizador y arquitectura definidas #########
+# Entrenar el modelo usando el optimizador y arquitectura definidas
 fc_model.fit(x_train, y_train, batch_size=100, epochs=10, validation_data=(x_test, y_test))
