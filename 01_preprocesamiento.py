@@ -5,17 +5,7 @@ import cv2
 import numpy as np 
 import funciones as fn
 import matplotlib.pyplot as plt 
-from sklearn.model_selection import train_test_split 
-from sklearn import metrics
-from sklearn.metrics import classification_report
 import joblib ### para descargar array
-
-#tensorflow
-from tensorflow import keras
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.utils import to_categorical
-import tensorflow as tf
-
 
 #############################################
 ##### ver ejemplo de imágenes cargadas ######
@@ -82,7 +72,7 @@ x_test = np.array(x_test).astype('float32') / 255
 
 ####### salidas del preprocesamiento bases listas ######
 
-joblib.dump(x_train, "Salidas/x_train.pkl")
-joblib.dump(y_train, "Salidas/y_train.pkl")
-joblib.dump(x_test, "Salidas/x_test.pkl")
-joblib.dump(y_test, "Salidas/y_test.pkl")
+joblib.dump(x_train, "Salidas/x_train.pkl", compress=3)
+joblib.dump(y_train, "Salidas/y_train.pkl", compress=3)
+joblib.dump(x_test, "Salidas/x_test.pkl", compress=3)
+joblib.dump(y_test, "Salidas/y_test.pkl", compress=3)
