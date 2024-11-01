@@ -30,8 +30,7 @@ y_test = joblib.load('salidas\\y_test.pkl')
 #################### Analisis problema ####################
 #### me interesa recall: de los enfermos que los pueda detectar, sin embargo
 #### el problema es que puede generar mucho trabajo porque clasifica a 
-####la mayoria como con neumonía, entonces usaremos el AUC que mide la capacidad e clasificación de neumoinía en balance con los noramles mal calsificados 
-
+#### la mayoria como con neumonía, entonces usaremos el AUC que mide la capacidad e clasificación de neumoinía en balance con los noramles mal calsificados 
 
 
 ############################################################
@@ -40,8 +39,8 @@ y_test = joblib.load('salidas\\y_test.pkl')
 
 ####################### RandomForest #######################
 
-x_train2=x_train.reshape(2637,30000)
-x_test2=x_test.reshape(660, 30000)
+x_train2 = x_train.reshape(2637,30000)
+x_test2 = x_test.reshape(660, 30000)
 x_train2.shape
 x_test2.shape
 
