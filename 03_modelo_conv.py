@@ -65,7 +65,7 @@ cnn_model = tf.keras.Sequential([
 cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC'])
 
 # Train the model for 10 epochs
-cnn_model.fit(x_train, y_train, batch_size=100, epochs=10, validation_data=(x_test, y_test))
+cnn_model.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
 
 
 cnn_model.summary()
@@ -182,7 +182,7 @@ test_loss, test_auc=fc_best_model.evaluate(x_test, y_test)
 pred_test=(fc_best_model.predict(x_test)>=0.50).astype('int')
 
 #################### exportar modelo afinado ##############
-fc_best_model.save('Analitica-en-salud\\best_model.h5')
+fc_best_model.save('best_model.h5')
 #################### exportar modelo afinado ##############
 pred_test1=(fc_best_model.predict(x_test) >= 0.98).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
