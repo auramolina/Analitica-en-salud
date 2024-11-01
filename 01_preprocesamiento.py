@@ -69,7 +69,7 @@ print('Dimensiones de y_test:', y_test.shape)
 
 ####### salidas del preprocesamiento bases listas ######
 
-joblib.dump(x_train, "Salidas/x_train.pkl", compress=3)
-joblib.dump(y_train, "Salidas/y_train.pkl", compress=3)
-joblib.dump(x_test, "Salidas/x_test.pkl", compress=3)
-joblib.dump(y_test, "Salidas/y_test.pkl", compress=3)
+joblib.dump(x_train, "Salidas\\x_train.pkl")
+joblib.dump(y_train, "Salidas\\y_train.pkl")
+joblib.dump(x_test, "Salidas\\x_test.pkl")
+joblib.dump(y_test, "Salidas\\y_test.pkl")
