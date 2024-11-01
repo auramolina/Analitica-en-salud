@@ -9,6 +9,9 @@ from sklearn.decomposition import PCA  # Para reducir dimensionalidad
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 import pandas as pd
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt 
 
 # Cargar datos preprocesados
 x_train = joblib.load('salidas/x_train.pkl')
@@ -38,6 +41,15 @@ pred_test_rf = best_rf.predict(x_test_reduced)
 print(metrics.classification_report(y_test, pred_test_rf))
 print("Random Forest AUC:", metrics.roc_auc_score(y_test, pred_test_rf))
 
+# Matriz de confusión para Random Forest
+cm_rf = confusion_matrix(y_test, pred_test_rf)
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm_rf, annot=True, fmt="d", cmap="Blues", xticklabels=["Benigno", "Maligno"], yticklabels=["Benigno", "Maligno"])
+plt.title("Matriz de Confusión - Random Forest")
+plt.xlabel("Predicción")
+plt.ylabel("Verdad Real")
+plt.show()
+
 # Optimización y ajuste del modelo Decision Tree
 dt = DecisionTreeClassifier()
 param_grid_dt = {
@@ -54,6 +66,15 @@ pred_test_dt = best_dt.predict(x_test_reduced)
 print(metrics.classification_report(y_test, pred_test_dt))
 print("Decision Tree AUC:", metrics.roc_auc_score(y_test, pred_test_dt))
 
+# Matriz de confusión para Decision Tree
+cm_dt = confusion_matrix(y_test, pred_test_dt)
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm_dt, annot=True, fmt="d", cmap="Greens", xticklabels=["Benigno", "Maligno"], yticklabels=["Benigno", "Maligno"])
+plt.title("Matriz de Confusión - Decision Tree")
+plt.xlabel("Predicción")
+plt.ylabel("Verdad Real")
+plt.show()
+
 # Aumentación de datos y entrenamiento de redes neuronales
 data_augmentation = tf.keras.Sequential([
     tf.keras.layers.RandomFlip("horizontal_and_vertical"),
@@ -68,25 +89,25 @@ dropout_rate = 0.3
 x_train_nn = x_train / 255.0  # Normalización de las imágenes
 x_test_nn = x_test / 255.0
 
-fc_model = tf.keras.models.Sequential([
-    data_augmentation,
-    tf.keras.layers.Flatten(input_shape=(100, 100, 3)),
-    tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(reg_strength)),
-    tf.keras.layers.Dropout(dropout_rate),
-    tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(reg_strength)),
-    tf.keras.layers.Dropout(dropout_rate),
+fc_model=tf.keras.models.Sequential([
+    tf.keras.layers.Flatten(input_shape=x_train.shape[1:]),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
+##### configura el optimizador y la función para optimizar ##############
+fc_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy','AUC', 'Recall', 'Precision'])
+#####Entrenar el modelo usando el optimizador y arquitectura definidas #########
+fc_model.fit(x_train, y_train, batch_size=100, epochs=100, validation_data=(x_test, y_test))
+test_loss, test_acc, test_auc, test_recall, test_precision = fc_model.evaluate(x_test, y_test, verbose=2)
+print("Test auc:", test_auc)
+###### matriz de confusión test
+pred_test=(fc_model.predict(x_test) > 0.65).astype('int')
+cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['maligno', 'benigno'])
+disp.plot()
 
-# Compilación del modelo
-fc_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['AUC', 'Recall', 'Precision'])
-
-# Entrenamiento del modelo de red neuronal
-fc_model.fit(x_train_nn, y_train, batch_size=64, epochs=10, validation_data=(x_test_nn, y_test))
-
-# Evaluación del modelo en el conjunto de prueba
-test_loss, test_auc, test_recall, test_precision = fc_model.evaluate(x_test, y_test, verbose=2)
-print("Test AUC:", test_auc)
+print(metrics.classification_report(y_test, pred_test))
 
 # Guardar el modelo con mejores métricas
-fc_model.save('mejor_modelo.h5')
+# fc_model.save('mejor_modelo.h5')
