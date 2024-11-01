@@ -45,14 +45,19 @@ plt.show()
 ####### Carga de imagenes y dividir en train/test ##########
 ############################################################
 
-width = 100 #tamaño para reescalar imágen
-num_classes = 2 #clases variable respuesta
+#width = 100 #tamaño para reescalar imágen
+#num_classes = 2 #clases variable respuesta
 trainpath = 'Data/train/'
 testpath = 'Data/test/'
 
 x_test, y_test, names_train = fn.import_data(testpath)
 x_train, y_train, names_train = fn.import_data(trainpath) #Run in train
 
+## Convertir en array
+x_train = np.array(x_train)
+y_train = np.array(y_train)
+x_test = np.array(x_test)
+y_test = np.array(y_test)
 
 # Verificar las formas de los datos
 print('Dimensiones de x_train:', x_train.shape)
@@ -60,15 +65,7 @@ print('Dimensiones de y_train:', y_train.shape)
 print('Dimensiones de x_test:', x_test.shape)
 print('Dimensiones de y_test:', y_test.shape)
 
-img_prueba = x_train[0]
-plt.imshow(img_prueba)
-plt.title(str(names_train[0]) + ('\nBenign' if y_train[0][0] == 0 else 'Malignant'))
-print()
 
-x_train.min(), x_train.max()
-
-x_train = np.array(x_train).astype('float32') / 255
-x_test = np.array(x_test).astype('float32') / 255
 
 ####### salidas del preprocesamiento bases listas ######
 

@@ -90,5 +90,3 @@ print("Test AUC:", test_auc)
 
 # Guardar el modelo con mejores métricas
 fc_model.save('mejor_modelo.h5')
-joblib.dump(best_rf, 'Salidas/mejor_modelo_rf.pkl')
-joblib.dump(best_dt, 'Salidas/mejor_modelo_dt.pkl')
