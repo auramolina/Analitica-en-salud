@@ -123,3 +123,5 @@ disp.plot()
 
 print(metrics.classification_report(y_test, pred_test))
 
+fc_model.save("best_model.h5")
+

@@ -168,7 +168,7 @@ tuner = kt.RandomSearch(
 
 
 
-tuner.search(x_train, y_train, epochs=3, validation_data=(x_test, y_test), batch_size=100)
+tuner.search(x_train, y_train, epochs=30, validation_data=(x_test, y_test), batch_size=100)
 
 fc_best_model = tuner.get_best_models(num_models=1)[0]
 
@@ -182,11 +182,11 @@ test_loss, test_auc=fc_best_model.evaluate(x_test, y_test)
 pred_test=(fc_best_model.predict(x_test)>=0.50).astype('int')
 
 #################### exportar modelo afinado ##############
-fc_best_model.save('best_model.h5')
+fc_best_model.save('best_model_cnn.h5')
 #################### exportar modelo afinado ##############
-pred_test1=(fc_best_model.predict(x_test) >= 0.98).astype('int')
+pred_test1=(fc_best_model.predict(x_test) >= 0.5).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
-disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['tumor', 'No_tumor'])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 print(metrics.classification_report(y_test, pred_test1))

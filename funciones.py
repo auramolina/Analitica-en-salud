@@ -5,6 +5,8 @@ from tqdm import tqdm  ### para crear contador en un for para ver evolución
 from os.path import join ### para unir ruta con archivo 
 import cv2
 
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
 def import_data(path, width = 100):
     
     rawImgs = []   #### una lista con el array que representa cada imágen
@@ -30,3 +32,22 @@ def import_data(path, width = 100):
                 elif l == 'malignant':
                     labels.append([1])
     return np.array(rawImgs), np.array(labels), names
+
+
+model_metrics = {
+    'Model': [],
+    'Accuracy': [],
+    'Precision': [],
+    'Recall': [],
+    'F1 Score': [],
+    'AUC': []
+}
+
+# Función para calcular y guardar las métricas en el diccionario
+def evaluate_model(y_true, y_pred_proba, y_pred_binary, model_name):
+    model_metrics['Model'].append(model_name)
+    model_metrics['Accuracy'].append(accuracy_score(y_true, y_pred_binary))
+    model_metrics['Precision'].append(precision_score(y_true, y_pred_binary))
+    model_metrics['Recall'].append(recall_score(y_true, y_pred_binary))
+    model_metrics['F1 Score'].append(f1_score(y_true, y_pred_binary))
+    model_metrics['AUC'].append(roc_auc_score(y_true, y_pred_proba))

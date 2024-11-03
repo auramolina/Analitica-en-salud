@@ -41,7 +41,7 @@ axs[1].set_title('Malignant 100x100')
 
 plt.show()
 
-# --------------------------------- Distribuciones de las clases ---------------------------- #
+########## Distribuciones de las clases ##########
 
 dataset_dir = 'Data'
 
@@ -63,7 +63,7 @@ df_summary = pd.DataFrame(data_summary)
 print("Resumen del Dataset:")
 print(df_summary)
 
-# ------------------------------------ Balance de las clases -------------------------------- #
+########### Balance de las clases ###########
 
 total_images = df_summary.groupby("Subset")["Image Count"].sum().reset_index(name="Total Images")
 
