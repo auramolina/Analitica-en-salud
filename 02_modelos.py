@@ -181,5 +181,5 @@ plt.ylabel("True label")
 plt.show()
 
 ##### Exportar el mejor modelo ######
-# best_xgb.save_model("best_xgb.model")
+best_xgb.save_model("xgb_model.model")
 
