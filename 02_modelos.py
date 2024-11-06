@@ -68,7 +68,7 @@ best_rf = random_search_rf.best_estimator_
 # Evaluación en el conjunto de entrenamiento
 print('------------------TRAIN RANDOM FOREST---------------------------')
 pred_train_proba = best_rf.predict_proba(x_train_reduced)[:, 1]
-pred_train = (pred_train_proba > 0.7).astype(int)
+pred_train = (pred_train_proba > 0.5).astype(int)
 print(classification_report(y_train, pred_train))
 train_auc = roc_auc_score(y_train, pred_train)
 print("AUC - Train Random Forest:", train_auc)
@@ -76,17 +76,12 @@ print("AUC - Train Random Forest:", train_auc)
 # Evaluación en el conjunto de prueba
 print('------------------TEST RANDOM FOREST---------------------------')
 pred_test_proba = best_rf.predict_proba(x_test_reduced)[:, 1]
-pred_test = (pred_test_proba > 0.7).astype(int)
+pred_test = (pred_test_proba > 0.5).astype(int)
 print(classification_report(y_test, pred_test))
 test_auc = roc_auc_score(y_test, pred_test)
 print("AUC - Test Random Forest:", test_auc)
 
-# matriz de confusión test
-# pred_test = (rf.predict(x_test3) > 0.70).astype('int')
-# cm = metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
-# disp = metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
-# disp.plot()
-# print(metrics.classification_report(y_test, pred_test))
+#Matriz de confusión para el conjunto de prueba
 cm_rf = confusion_matrix(y_test, pred_test, labels=[1, 0])
 disp = ConfusionMatrixDisplay(cm_rf, display_labels=['Malignant', 'Benign'])
 disp.plot(cmap="Blues")
@@ -121,7 +116,7 @@ best_xgb = random_search_xgb.best_estimator_     # Modelo con mejores parámetro
 print('------------------TRAIN XGBOOST---------------------------')
 # Predicción y ajuste de umbral en el conjunto de entrenamiento
 pred_train_proba = best_xgb.predict_proba(x_train_reduced)[:, 1]
-pred_train = (pred_train_proba > 0.7).astype(int)
+pred_train = (pred_train_proba > 0.5).astype(int)
 
 # Reporte de métricas en el conjunto de entrenamiento
 print(classification_report(y_train, pred_train))
@@ -131,7 +126,7 @@ print("AUC - Train XGBoost:", train_auc)
 print('------------------TEST XGBOOST---------------------------')
 # Predicción y ajuste de umbral en el conjunto de prueba
 pred_test_proba = best_xgb.predict_proba(x_test_reduced)[:, 1]
-pred_test = (pred_test_proba > 0.7).astype(int)
+pred_test = (pred_test_proba > 0.5).astype(int)
 
 # Reporte de métricas en el conjunto de prueba
 print(classification_report(y_test, pred_test))
@@ -147,29 +142,6 @@ plt.xlabel("Predicción")
 plt.ylabel("Verdad Real")
 plt.show()
 
-###################### Decsion tree #######################
-
-# clf_dt = tree.DecisionTreeClassifier()
-# clf = clf_dt.fit(x_train2, y_train)
-
-# print('-----------------TRAIN DECISION TREE---------------------------')
-# pred_train = clf_dt.predict_proba(x_train2)[:, 1]
-# pred_train = (pred_train > 0.7).astype(int)
-# print(metrics.classification_report(y_train, pred_train))
-# metrics.roc_auc_score(y_train, pred_train)
-
-# print('------------------TEST DECISION TREE---------------------------')
-# pred_test = clf_dt.predict_proba(x_test2)[:, 1]
-# pred_test = (pred_test > 0.7).astype(int)
-# print(metrics.classification_report(y_test, pred_test))
-# metrics.roc_auc_score(y_test, pred_test)
-
-# # matriz de confusión test
-# pred_test = (clf_dt.predict(x_test2) > 0.70).astype('int')
-# cm = metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
-# disp = metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
-# disp.plot()
-# print(metrics.classification_report(y_test, pred_test))
 
 ############################################################
 ############ Probar modelos de redes neuronales ############
@@ -195,11 +167,13 @@ print(classification_report(y_test, pred_test))
 print("Test auc:", test_auc)
 
 # matriz de confusión test
-pred_test = (fc_model.predict(x_test) > 0.70).astype('int')
+pred_test = (fc_model.predict(x_test) > 0.50).astype('int')
 cm = metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
 disp = metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 print(metrics.classification_report(y_test, pred_test))
 
-best_xgb.save_model("best_xgb.h5")
+
+##### Exportar el mejor modelo ######
+best_xgb.save_model("best_xgb.model")
 

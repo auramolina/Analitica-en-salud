@@ -16,11 +16,6 @@ y_train = joblib.load('salidas\\y_train.pkl')
 x_test = joblib.load('salidas\\x_test.pkl')
 y_test = joblib.load('salidas\\y_test.pkl')
 
-#x_train = joblib.load('C:\Users\Gilber\Desktop\Analitica-en-salud\Analitica-en-salud\Salidas')
-#y_train = joblib.load('C:\Users\Gilber\Desktop\Analitica-en-salud\Analitica-en-salud\Salidas')
-#x_test = joblib.load('C:\Users\Gilber\Desktop\Analitica-en-salud\Analitica-en-salud\Salidas')
-#y_test = joblib.load('C:\Users\Gilber\Desktop\Analitica-en-salud\Analitica-en-salud\Salidas')
-
 x_train[0]
 
 ############################################################
@@ -62,13 +57,22 @@ cnn_model = tf.keras.Sequential([
 ])
 
 # Compile the model with binary cross-entropy loss and Adam optimizer
-cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC'])
+cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC','Recall'])
 
 # Train the model for 30 epochs
 cnn_model.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
 
 
 cnn_model.summary()
+
+test_loss, test_auc=cnn_model.evaluate(x_test, y_test)
+pred_test1=(cnn_model.predict(x_test) >= 0.98).astype('int')
+cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
+disp.plot()
+
+print(metrics.classification_report(y_test, pred_test1))
+print(f"Test AUC: {test_auc}")
 
 #######probar una red con regulzarización L2 Para ver si hay alguna diferencia debido a que los datos dieron muy bien
 #######probar una red con regulzarización L2
@@ -94,15 +98,19 @@ cnn_model2 = tf.keras.Sequential([
 # Compile the model with binary cross-entropy loss and Adam optimizer
 cnn_model2.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC',"accuracy"])
 
-# Train the model for 10 epochs
-#cnn_model2.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
+##Train the model for 10 epochs
+cnn_model2.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
 
-#pred_test1=(cnn_model2.predict(x_test) >= 0.98).astype('int')
-#cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
-#disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['tumor', 'No_tumor'])
-#disp.plot()
 
-#print(metrics.classification_report(y_test, pred_test1))
+test_loss, test_auc=cnn_model2.evaluate(x_test, y_test)
+pred_test1=(cnn_model2.predict(x_test) >= 0.98).astype('int')
+cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
+disp.plot()
+
+print(metrics.classification_report(y_test, pred_test1))
+print(f"Test AUC: {test_auc}")
+
 
 #####################################################
 ###### afinar hiperparameter ########################
@@ -157,12 +165,8 @@ tuner = kt.RandomSearch(
     tune_new_entries=True, 
     objective=kt.Objective("Recall", direction="max"),
     max_trials=10,
-    overwrite=True,
-    directory="my_dir",
-    project_name="helloworld", 
+    overwrite=True, 
 )
-
-
 
 tuner.search(x_train, y_train, epochs=30, validation_data=(x_test, y_test), batch_size=100)
 
@@ -172,7 +176,7 @@ fc_best_model = tuner.get_best_models(num_models=1)[0]
 tuner.results_summary()
 fc_best_model.summary()
 
-
+## Matriz de confusión para los datos de test
 test_loss, test_auc=fc_best_model.evaluate(x_test, y_test)
 pred_test=(fc_best_model.predict(x_test)>=0.5).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])

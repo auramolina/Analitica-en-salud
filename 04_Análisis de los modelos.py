@@ -9,6 +9,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from xgboost import XGBClassifier
+
 ###Importar imagenes
 x_train = joblib.load('Salidas/x_train.pkl')
 y_train = joblib.load('Salidas/y_train.pkl')
@@ -23,10 +25,12 @@ x_train /=255
 x_test /=255
 
 
-##### cargar modelo  ######
+##### cargar modelo h5  ######
 
-modelo=tf.keras.models.load_model('best_model_cnn.h5')
+##modelo=tf.keras.models.load_model('best_model_cnn.h5')
+modelo = XGBClassifier()
 
+modelo.load_model('best_xgb.model')
 
 
 ####desempeño en evaluación para grupo 1 (tienen cancer de piel) #######
@@ -100,3 +104,4 @@ clases, count = np.unique(clas, return_counts=True)
 
 # Calcular el porcentaje de cada clase
 count * 100 / np.sum(count)
+
