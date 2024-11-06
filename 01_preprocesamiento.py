@@ -41,6 +41,39 @@ axs[1].set_title('Malignant 100x100')
 
 plt.show()
 
+# --------------------------------- Distribuciones de las clases ---------------------------- #
+
+dataset_dir = 'Data'
+
+subsets = ["test", "train"]
+classes = ["benign", "malignant"]  # 0 para benigno, 1 para maligno
+
+data_summary = {"Subset": [], "Class": [], "Image Count": []}
+
+for subset in subsets:
+    for class_label in classes:
+        class_dir = os.path.join(dataset_dir, subset, class_label)
+        image_count = len(os.listdir(class_dir))
+        data_summary["Subset"].append(subset)
+        data_summary["Class"].append(class_label)
+        data_summary["Image Count"].append(image_count)
+
+df_summary = pd.DataFrame(data_summary)
+
+print("Resumen del Dataset:")
+print(df_summary)
+
+# ------------------------------------ Balance de las clases -------------------------------- #
+
+total_images = df_summary.groupby("Subset")["Image Count"].sum().reset_index(name="Total Images")
+
+df_summary = pd.merge(df_summary, total_images, on="Subset")
+
+df_summary["Class Percentage"] = ((df_summary["Image Count"] / df_summary["Total Images"]) * 100).round(2)
+
+print("Análisis Descriptivo del Balance de Clases:")
+print(df_summary)
+
 ############################################################
 ####### Carga de imagenes y dividir en train/test ##########
 ############################################################
@@ -69,7 +102,7 @@ print('Dimensiones de y_test:', y_test.shape)
 
 ####### salidas del preprocesamiento bases listas ######
 
-joblib.dump(x_train, "Salidas/x_train.pkl", compress=3)
-joblib.dump(y_train, "Salidas/y_train.pkl", compress=3)
-joblib.dump(x_test, "Salidas/x_test.pkl", compress=3)
-joblib.dump(y_test, "Salidas/y_test.pkl", compress=3)
+joblib.dump(x_train, "Salidas\\x_train.pkl")
+joblib.dump(y_train, "Salidas\\y_train.pkl")
+joblib.dump(x_test, "Salidas\\x_test.pkl")
+joblib.dump(y_test, "Salidas\\y_test.pkl")
