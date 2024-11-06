@@ -46,10 +46,27 @@ y_pred = xgb_model.predict(X_test)
 
 # Evaluate the model
 print('------------------XGBOOST---------------------------')
-accuracy = accuracy_score(y_test, y_pred)
-print(f'Accuracy: {accuracy:.4f}')
+test_auc = roc_auc_score(y_test, y_pred)
+# accuracy = accuracy_score(y_test, y_pred)
+print(f'AUC - Test XGBoost: {test_auc:.4f}')
 print('Classification Report:')
 print(classification_report(y_test, y_pred))
+
+# Visualización de la matriz de confusión
+# cm = confusion_matrix(test_labels, y_pred)
+# disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Class 0', 'Class 1'])
+# disp.plot(cmap="Blues")
+# plt.title("Matriz de Confusión - XGBoost")
+# plt.xlabel("Predicción")
+# plt.ylabel("Verdad Real")
+# plt.show()
+# matriz de confusión test
+from sklearn import metrics
+pred_test = (xgb_model.predict(X_test) > 0.70).astype('int')
+cm = metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
+disp = metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
+disp.plot()
+# print(metrics.classification_report(y_test, pred_test))
 
 # Exportar modelo
 xgb_model.save_model("xgb_model.model")
