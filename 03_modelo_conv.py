@@ -148,7 +148,7 @@ def build_model(hp):
         opt = tf.keras.optimizers.RMSprop(learning_rate=0.001)
    
     model.compile(
-        optimizer=opt, loss="binary_crossentropy", metrics=["Recall", "AUC"],
+        optimizer=opt, loss="binary_crossentropy", metrics=["Recall"],
     )
     
     
@@ -164,7 +164,9 @@ tuner = kt.RandomSearch(
     tune_new_entries=True, 
     objective=kt.Objective("Recall", direction="max"),
     max_trials=10,
-    overwrite=True, 
+    overwrite=True,
+    directory="my_dir",
+    project_name="helloworld", 
 )
 
 tuner.search(x_train, y_train, epochs=30, validation_data=(x_test, y_test), batch_size=100)
@@ -176,15 +178,15 @@ tuner.results_summary()
 fc_best_model.summary()
 
 ## Matriz de confusión para los datos de test
-test_loss, test_auc, test_accuracy=fc_best_model.evaluate(x_test, y_test)
+test_loss, test_auc=fc_best_model.evaluate(x_test, y_test)
 pred_test=(fc_best_model.predict(x_test)>=0.5).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
 disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
-print(metrics.classification_report(y_test, pred_test1))
+print(metrics.classification_report(y_test, pred_test))
 print(f"Test AUC: {test_auc}")
 
 #################### exportar modelo afinado ##############
-fc_best_model.save('best_model.h5')
+fc_best_model.save('best_model_cnn.h5')
 #################### exportar modelo afinado ##############

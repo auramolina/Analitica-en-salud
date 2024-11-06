@@ -28,9 +28,9 @@ x_test /=255
 ##### cargar modelo h5  ######
 
 ##modelo=tf.keras.models.load_model('best_model_cnn.h5')
-modelo = XGBClassifier()
+#modelo = XGBClassifier()
 
-modelo.load_model('best_xgb.model')
+modelo.load_model('best_model_cnn.h5')
 
 
 ####desempeño en evaluación para grupo 1 (tienen cancer de piel) #######
@@ -108,13 +108,13 @@ count * 100 / np.sum(count)
 #### Para XgBoost #####
 
 # Cargar el modelo XGBoost
-modelo = XGBClassifier()
-modelo.load_model('best_xgb.model')
+modeloxg = XGBClassifier()
+modeloxg.load_model('xgb_model.model')
 
 # Definir función para evaluación y visualización de resultados
 def evaluar_modelo(modelo, x_data, y_data, threshold, dataset_name="Test"):
     # Predicción de probabilidades
-    prob = modelo.predict_proba(x_data)[:, 1]  # Probabilidad para clase 1 (Malignant)
+    prob = modeloxg.predict_proba(x_data)[:, 1]  # Probabilidad para clase 1 (Malignant)
     
     # Histograma de probabilidades
     sns.histplot(prob, legend=False)
