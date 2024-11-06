@@ -93,8 +93,10 @@ disp.plot()
 
 prob=modelo.predict(x_test)
 
-clas=['Malignant' if prob >0.508 else 'Benign' if prob <0.5015 else "No ident" for prob in prob]
+clas = ['Malignant' if prob > 0.495 else 'Benign' for prob in prob]
 
-clases, count =np.unique(clas, return_counts=True)
+# Contar las clases únicas
+clases, count = np.unique(clas, return_counts=True)
 
-count*100/np.sum(count)
+# Calcular el porcentaje de cada clase
+count * 100 / np.sum(count)

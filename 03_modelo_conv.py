@@ -64,12 +64,13 @@ cnn_model = tf.keras.Sequential([
 # Compile the model with binary cross-entropy loss and Adam optimizer
 cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC'])
 
-# Train the model for 10 epochs
+# Train the model for 30 epochs
 cnn_model.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
 
 
 cnn_model.summary()
 
+#######probar una red con regulzarización L2 Para ver si hay alguna diferencia debido a que los datos dieron muy bien
 #######probar una red con regulzarización L2
 reg_strength = 0.001
 
@@ -94,34 +95,30 @@ cnn_model2 = tf.keras.Sequential([
 cnn_model2.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC',"accuracy"])
 
 # Train the model for 10 epochs
-cnn_model2.fit(x_train, y_train, batch_size=100, epochs=3, validation_data=(x_test, y_test))
+#cnn_model2.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
 
-pred_test1=(cnn_model2.predict(x_test) >= 0.98).astype('int')
-cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
-disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['tumor', 'No_tumor'])
-disp.plot()
+#pred_test1=(cnn_model2.predict(x_test) >= 0.98).astype('int')
+#cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
+#disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['tumor', 'No_tumor'])
+#disp.plot()
 
-print(metrics.classification_report(y_test, pred_test1))
+#print(metrics.classification_report(y_test, pred_test1))
 
 #####################################################
 ###### afinar hiperparameter ########################
 #####################################################
 
 
-
+##para ver si disminuye los falsos positivos se decide afinar los hiper parametros
 ##### función con definicion de hiperparámetros a afinar
 hp = kt.HyperParameters()
 
 def build_model(hp):
     
-    dropout_rate=hp.Float('DO', min_value=0.05, max_value= 0.2, step=0.05)
-    reg_strength = hp.Float("rs", min_value=0.0001, max_value=0.0005, step=0.0001)
+    dropout_rate=hp.Float('DO', min_value=0.05, max_value= 0.5, step=0.05)
+    reg_strength = hp.Float("rs", min_value=0.0001, max_value=0.0009, step=0.0001)
     optimizer = hp.Choice('optimizer', ['adam', 'sgd']) ### en el contexto no se debería afinar
-   
-    ####hp.Int
-    ####hp.Choice
     
-
     model= tf.keras.Sequential([
         tf.keras.layers.Conv2D(16, kernel_size=(3, 3), activation='relu', input_shape=x_train.shape[1:], kernel_regularizer=tf.keras.regularizers.l2(reg_strength)),
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
@@ -135,7 +132,6 @@ def build_model(hp):
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
     
-  
     
     if optimizer == 'adam':
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
@@ -145,7 +141,7 @@ def build_model(hp):
         opt = tf.keras.optimizers.RMSprop(learning_rate=0.001)
    
     model.compile(
-        optimizer=opt, loss="binary_crossentropy", metrics=["Recall"],
+        optimizer=opt, loss="binary_crossentropy", metrics=["Recall", "AUC"],
     )
     
     
@@ -159,8 +155,8 @@ tuner = kt.RandomSearch(
     hypermodel=build_model,
     hyperparameters=hp,
     tune_new_entries=True, 
-    objective=kt.Objective("recall", direction="max"),
-    max_trials=2,
+    objective=kt.Objective("Recall", direction="max"),
+    max_trials=10,
     overwrite=True,
     directory="my_dir",
     project_name="helloworld", 
@@ -173,20 +169,18 @@ tuner.search(x_train, y_train, epochs=30, validation_data=(x_test, y_test), batc
 fc_best_model = tuner.get_best_models(num_models=1)[0]
 
 
-
 tuner.results_summary()
 fc_best_model.summary()
 
 
 test_loss, test_auc=fc_best_model.evaluate(x_test, y_test)
-pred_test=(fc_best_model.predict(x_test)>=0.50).astype('int')
-
-#################### exportar modelo afinado ##############
-fc_best_model.save('best_model_cnn.h5')
-#################### exportar modelo afinado ##############
-pred_test1=(fc_best_model.predict(x_test) >= 0.5).astype('int')
-cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
+pred_test=(fc_best_model.predict(x_test)>=0.5).astype('int')
+cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
 disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 print(metrics.classification_report(y_test, pred_test1))
+
+#################### exportar modelo afinado ##############
+fc_best_model.save('best_model.h5')
+#################### exportar modelo afinado ##############
