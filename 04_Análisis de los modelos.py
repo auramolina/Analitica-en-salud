@@ -25,7 +25,7 @@ x_test /=255
 
 ##### cargar modelo  ######
 
-modelo=tf.keras.models.load_model('mejor_modelo.h5')
+modelo=tf.keras.models.load_model('best_model_cnn.h5')
 
 
 
@@ -40,7 +40,7 @@ threshold_neu=0.508
 pred_test=(modelo.predict(x_test)>=threshold_neu).astype('int')
 print(metrics.classification_report(y_test, pred_test))
 cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
-disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Pneu', 'Normal'])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 
@@ -53,7 +53,7 @@ plt.title("probabilidades imágenes en entrenamiento")### conocer el comportamie
 pred_train=(prob>=threshold_neu).astype('int')
 print(metrics.classification_report(y_train, pred_train))
 cm=metrics.confusion_matrix(y_train,pred_train, labels=[1,0])
-disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Pneu', 'Normal'])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 
@@ -71,7 +71,7 @@ threshold_no_neu=0.5015
 pred_test=(modelo.predict(x_test)>=threshold_no_neu).astype('int')
 print(metrics.classification_report(y_test, pred_test))
 cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
-disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Pneu', 'Normal'])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 
@@ -84,7 +84,7 @@ plt.title("probabilidades imágenes en entrenamiento")### conocer el comportamie
 pred_train=(prob>=threshold_no_neu).astype('int')
 print(metrics.classification_report(y_train, pred_train))
 cm=metrics.confusion_matrix(y_train,pred_train, labels=[1,0])
-disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Pneu', 'Normal'])
+disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 
@@ -93,7 +93,7 @@ disp.plot()
 
 prob=modelo.predict(x_test)
 
-clas=['Neu' if prob >0.508 else 'No Neu' if prob <0.5015 else "No ident" for prob in prob]
+clas=['Malignant' if prob >0.508 else 'Benign' if prob <0.5015 else "No ident" for prob in prob]
 
 clases, count =np.unique(clas, return_counts=True)
 
