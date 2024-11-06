@@ -40,18 +40,19 @@ np.unique(y_test, return_counts=True)
 ############## Probar modelos de tradicionales #############
 ############################################################
 
-####################### RandomForest #######################
-
 # x_train2 = x_train.reshape(2637,30000)
 # x_test2 = x_test.reshape(660, 30000)
 # x_train2.shape
 # x_test2.shape
-# rf = RandomForestClassifier()
-# rf.fit(x_train2, y_train)
 
 pca = PCA(n_components=100)
 x_train_reduced = pca.fit_transform(x_train.reshape(len(x_train), -1))
 x_test_reduced = pca.transform(x_test.reshape(len(x_test), -1))
+
+####################### RandomForest #######################
+
+# rf = RandomForestClassifier()
+# rf.fit(x_train2, y_train)
 
 # Optimización del modelo Random Forest
 rf = RandomForestClassifier()
@@ -84,17 +85,13 @@ print("AUC - Test Random Forest:", test_auc)
 #Matriz de confusión para el conjunto de prueba
 cm_rf = confusion_matrix(y_test, pred_test, labels=[1, 0])
 disp = ConfusionMatrixDisplay(cm_rf, display_labels=['Malignant', 'Benign'])
-disp.plot(cmap="Blues")
+disp.plot(cmap="RdPu")
 plt.title("Matriz de Confusión - Random Forest")
-plt.xlabel("Predicción")
-plt.ylabel("Verdad Real")
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
 plt.show()
 
 ####################### XGBoosting ########################
-
-pca = PCA(n_components=100)  
-x_train_reduced = pca.fit_transform(x_train.reshape(len(x_train), -1))
-x_test_reduced = pca.transform(x_test.reshape(len(x_test), -1))
 
 param_grid_xgb = {
     'n_estimators': [100, 200, 300],        # Número de árboles
@@ -117,8 +114,6 @@ print('------------------TRAIN XGBOOST---------------------------')
 # Predicción y ajuste de umbral en el conjunto de entrenamiento
 pred_train_proba = best_xgb.predict_proba(x_train_reduced)[:, 1]
 pred_train = (pred_train_proba > 0.5).astype(int)
-
-# Reporte de métricas en el conjunto de entrenamiento
 print(classification_report(y_train, pred_train))
 train_auc = roc_auc_score(y_train, pred_train)
 print("AUC - Train XGBoost:", train_auc)
@@ -127,8 +122,6 @@ print('------------------TEST XGBOOST---------------------------')
 # Predicción y ajuste de umbral en el conjunto de prueba
 pred_test_proba = best_xgb.predict_proba(x_test_reduced)[:, 1]
 pred_test = (pred_test_proba > 0.5).astype(int)
-
-# Reporte de métricas en el conjunto de prueba
 print(classification_report(y_test, pred_test))
 test_auc = roc_auc_score(y_test, pred_test)
 print("AUC - Test XGBoost:", test_auc)
@@ -136,10 +129,10 @@ print("AUC - Test XGBoost:", test_auc)
 # Matriz de confusión para el conjunto de prueba
 cm_xgb = confusion_matrix(y_test, pred_test, labels=[1, 0])
 disp = ConfusionMatrixDisplay(cm_xgb, display_labels=['Malignant', 'Benign'])
-disp.plot(cmap="Oranges")
+disp.plot(cmap="RdPu")
 plt.title("Matriz de Confusión - XGBoost")
-plt.xlabel("Predicción")
-plt.ylabel("Verdad Real")
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
 plt.show()
 
 
@@ -161,19 +154,32 @@ fc_model.fit(x_train, y_train, batch_size=100, epochs=100, validation_data=(x_te
 
 # Evaluar el modelo
 test_loss, test_acc, test_auc, test_recall, test_precision = fc_model.evaluate(x_test, y_test, verbose=2)
-# print("Test auc:", test_auc)
-print('----------------- TEST NN ---------------------------')
+
+# Obtener predicciones en el conjunto de entrenamiento
+print('------------------TRAIN NEURAL NETWORK---------------------------')
+pred_train_proba = fc_model.predict(x_train).flatten()
+pred_train = (pred_train_proba > 0.5).astype(int)
+print(classification_report(y_train, pred_train))
+train_auc = roc_auc_score(y_train, pred_train)
+print("AUC - Train Neural Network:", train_auc)
+
+# Obtener predicciones en el conjunto de prueba
+print('------------------TEST NEURAL NETWORK---------------------------')
+pred_test_proba = fc_model.predict(x_test).flatten()
+pred_test = (pred_test_proba > 0.5).astype(int)
 print(classification_report(y_test, pred_test))
-print("Test auc:", test_auc)
+test_auc = roc_auc_score(y_test, pred_test)
+print("AUC - Test Neural Network:", test_auc)
 
-# matriz de confusión test
-pred_test = (fc_model.predict(x_test) > 0.50).astype('int')
-cm = metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
-disp = metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
-disp.plot()
-print(metrics.classification_report(y_test, pred_test))
-
+# Matriz de confusión para el conjunto de prueba
+cm = confusion_matrix(y_test, pred_test, labels=[1, 0])
+disp = ConfusionMatrixDisplay(cm, display_labels=['Malignant', 'Benign'])
+disp.plot(cmap="RdPu")
+plt.title("Matriz de Confusión - Neural Network")
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.show()
 
 ##### Exportar el mejor modelo ######
-best_xgb.save_model("best_xgb.model")
+# best_xgb.save_model("best_xgb.model")
 
