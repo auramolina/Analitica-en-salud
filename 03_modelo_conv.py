@@ -1,5 +1,6 @@
 import numpy as np
 import joblib ### para cargar array
+import matplotlib.pyplot as plt
 
 ########Paquetes para NN #########
 import tensorflow as tf
@@ -65,14 +66,12 @@ cnn_model.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_te
 
 cnn_model.summary()
 
-test_loss, test_auc=cnn_model.evaluate(x_test, y_test)
-pred_test1=(cnn_model.predict(x_test) >= 0.98).astype('int')
+pred_test1=(cnn_model.predict(x_test) >= 0.5).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
 disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 print(metrics.classification_report(y_test, pred_test1))
-print(f"Test AUC: {test_auc}")
 
 #######probar una red con regulzarización L2 Para ver si hay alguna diferencia debido a que los datos dieron muy bien
 #######probar una red con regulzarización L2
@@ -102,8 +101,8 @@ cnn_model2.compile(loss='binary_crossentropy', optimizer='adam', metrics=['AUC',
 cnn_model2.fit(x_train, y_train, batch_size=100, epochs=30, validation_data=(x_test, y_test))
 
 
-test_loss, test_auc=cnn_model2.evaluate(x_test, y_test)
-pred_test1=(cnn_model2.predict(x_test) >= 0.98).astype('int')
+test_loss, test_accuracy , test_auc=cnn_model2.evaluate(x_test, y_test)
+pred_test1=(cnn_model2.predict(x_test) >= 0.5).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test1, labels=[1,0])
 disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
@@ -124,7 +123,7 @@ hp = kt.HyperParameters()
 def build_model(hp):
     
     dropout_rate=hp.Float('DO', min_value=0.05, max_value= 0.5, step=0.05)
-    reg_strength = hp.Float("rs", min_value=0.0001, max_value=0.0009, step=0.0001)
+    reg_strength = hp.Float("rs", min_value=0.0001, max_value=0.001, step=0.0001)
     optimizer = hp.Choice('optimizer', ['adam', 'sgd']) ### en el contexto no se debería afinar
     
     model= tf.keras.Sequential([
@@ -177,13 +176,14 @@ tuner.results_summary()
 fc_best_model.summary()
 
 ## Matriz de confusión para los datos de test
-test_loss, test_auc=fc_best_model.evaluate(x_test, y_test)
+test_loss, test_auc, test_accuracy=fc_best_model.evaluate(x_test, y_test)
 pred_test=(fc_best_model.predict(x_test)>=0.5).astype('int')
 cm=metrics.confusion_matrix(y_test,pred_test, labels=[1,0])
 disp=metrics.ConfusionMatrixDisplay(cm,display_labels=['Malignant', 'Benign'])
 disp.plot()
 
 print(metrics.classification_report(y_test, pred_test1))
+print(f"Test AUC: {test_auc}")
 
 #################### exportar modelo afinado ##############
 fc_best_model.save('best_model.h5')

@@ -105,3 +105,58 @@ clases, count = np.unique(clas, return_counts=True)
 # Calcular el porcentaje de cada clase
 count * 100 / np.sum(count)
 
+#### Para XgBoost #####
+
+# Cargar el modelo XGBoost
+modelo = XGBClassifier()
+modelo.load_model('best_xgb.model')
+
+# Definir función para evaluación y visualización de resultados
+def evaluar_modelo(modelo, x_data, y_data, threshold, dataset_name="Test"):
+    # Predicción de probabilidades
+    prob = modelo.predict_proba(x_data)[:, 1]  # Probabilidad para clase 1 (Malignant)
+    
+    # Histograma de probabilidades
+    sns.histplot(prob, legend=False)
+    plt.title(f"Probabilidades - {dataset_name}")
+    plt.show()
+
+    # Aplicar umbral para predicciones
+    pred = (prob >= threshold).astype('int')
+    
+    # Mostrar el reporte de clasificación
+    print(f"Classification Report - {dataset_name} Dataset")
+    print(metrics.classification_report(y_data, pred))
+    
+    # Matriz de confusión
+    cm = metrics.confusion_matrix(y_data, pred, labels=[1, 0])
+    disp = metrics.ConfusionMatrixDisplay(cm, display_labels=['Malignant', 'Benign'])
+    disp.plot()
+    plt.show()
+
+# Evaluación en datos de prueba y entrenamiento con diferentes thresholds
+threshold_malignant = 0.508
+threshold_benign = 0.5015
+
+print("Evaluación en conjunto de prueba (Malignant Threshold)")
+evaluar_modelo(modelo, x_test, y_test, threshold_malignant, dataset_name="Test - Malignant")
+
+print("Evaluación en conjunto de entrenamiento (Malignant Threshold)")
+evaluar_modelo(modelo, x_train, y_train, threshold_malignant, dataset_name="Train - Malignant")
+
+print("Evaluación en conjunto de prueba (Benign Threshold)")
+evaluar_modelo(modelo, x_test, y_test, threshold_benign, dataset_name="Test - Benign")
+
+print("Evaluación en conjunto de entrenamiento (Benign Threshold)")
+evaluar_modelo(modelo, x_train, y_train, threshold_benign, dataset_name="Train - Benign")
+
+# Clasificación final basada en probabilidad
+prob_test = modelo.predict_proba(x_test)[:, 1]
+clas_final = ['Malignant' if prob > 0.495 else 'Benign' for prob in prob_test]
+
+# Contar las clases únicas y calcular el porcentaje de cada clase
+clases, count = np.unique(clas_final, return_counts=True)
+porcentajes = count * 100 / np.sum(count)
+print("Clasificación Final:")
+for clase, porcentaje in zip(clases, porcentajes):
+    print(f"{clase}: {porcentaje:.2f}%")
