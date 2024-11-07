@@ -40,56 +40,10 @@ np.unique(y_test, return_counts=True)
 ############## Probar modelos de tradicionales #############
 ############################################################
 
-# x_train2 = x_train.reshape(2637,30000)
-# x_test2 = x_test.reshape(660, 30000)
-# x_train2.shape
-# x_test2.shape
-
 pca = PCA(n_components=100)
 x_train_reduced = pca.fit_transform(x_train.reshape(len(x_train), -1))
 x_test_reduced = pca.transform(x_test.reshape(len(x_test), -1))
 
-####################### RandomForest #######################
-
-# rf = RandomForestClassifier()
-# rf.fit(x_train2, y_train)
-
-# Optimización del modelo Random Forest
-rf = RandomForestClassifier()
-param_grid_rf = {
-    'n_estimators': [50, 100, 200],
-    'max_depth': [10, 20, None],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4]
-}
-random_search_rf = RandomizedSearchCV(rf, param_distributions=param_grid_rf, n_iter=10, cv=3, scoring='roc_auc')
-random_search_rf.fit(x_train_reduced, y_train)
-best_rf = random_search_rf.best_estimator_
-
-# Evaluación en el conjunto de entrenamiento
-print('------------------TRAIN RANDOM FOREST---------------------------')
-pred_train_proba = best_rf.predict_proba(x_train_reduced)[:, 1]
-pred_train = (pred_train_proba > 0.5).astype(int)
-print(classification_report(y_train, pred_train))
-train_auc = roc_auc_score(y_train, pred_train)
-print("AUC - Train Random Forest:", train_auc)
-
-# Evaluación en el conjunto de prueba
-print('------------------TEST RANDOM FOREST---------------------------')
-pred_test_proba = best_rf.predict_proba(x_test_reduced)[:, 1]
-pred_test = (pred_test_proba > 0.5).astype(int)
-print(classification_report(y_test, pred_test))
-test_auc = roc_auc_score(y_test, pred_test)
-print("AUC - Test Random Forest:", test_auc)
-
-#Matriz de confusión para el conjunto de prueba
-cm_rf = confusion_matrix(y_test, pred_test, labels=[1, 0])
-disp = ConfusionMatrixDisplay(cm_rf, display_labels=['Malignant', 'Benign'])
-disp.plot(cmap="RdPu")
-plt.title("Matriz de Confusión - Random Forest")
-plt.xlabel("Predicted label")
-plt.ylabel("True label")
-plt.show()
 
 ####################### XGBoosting ########################
 

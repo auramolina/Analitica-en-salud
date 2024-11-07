@@ -188,5 +188,5 @@ print(metrics.classification_report(y_test, pred_test))
 print(f"Test AUC: {test_auc}")
 
 #################### exportar modelo afinado ##############
-fc_best_model.save('best_model_cnn.h5')
+fc_best_model.save('best_model.h5')
 #################### exportar modelo afinado ##############
