@@ -47,6 +47,36 @@ x_test_reduced = pca.transform(x_test.reshape(len(x_test), -1))
 
 ####################### XGBoosting ########################
 
+xgb = XGBClassifier(use_label_encoder=False, eval_metric='logloss')  # Configuración inicial de XGBoost
+xgb.fit(x_train_reduced, y_train)
+
+print('------------------TRAIN XGBOOST---------------------------')
+# Predicción y ajuste de umbral en el conjunto de entrenamiento
+pred_train_proba = xgb.predict_proba(x_train_reduced)[:, 1]
+pred_train = (pred_train_proba > 0.5).astype(int)
+print(classification_report(y_train, pred_train))
+train_auc = roc_auc_score(y_train, pred_train)
+print("AUC - Train XGBoost:", train_auc)
+
+print('------------------TEST XGBOOST---------------------------')
+# Predicción y ajuste de umbral en el conjunto de prueba
+pred_test_proba = xgb.predict_proba(x_test_reduced)[:, 1]
+pred_test = (pred_test_proba > 0.5).astype(int)
+print(classification_report(y_test, pred_test))
+test_auc = roc_auc_score(y_test, pred_test)
+print("AUC - Test XGBoost:", test_auc)
+
+# Matriz de confusión para el conjunto de prueba
+cm_xgb = confusion_matrix(y_test, pred_test, labels=[1, 0])
+disp = ConfusionMatrixDisplay(cm_xgb, display_labels=['Malignant', 'Benign'])
+disp.plot(cmap="RdPu")
+plt.title("Matriz de Confusión - XGBoost")
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.show()
+
+### Hiperparámetros
+# RandomizedSearchCV para ajustar los parámetros
 param_grid_xgb = {
     'n_estimators': [100, 200, 300],        # Número de árboles
     'max_depth': [3, 5, 10],                # Profundidad de cada árbol
@@ -54,10 +84,6 @@ param_grid_xgb = {
     'subsample': [0.6, 0.8, 1.0],           # Porcentaje de muestras para entrenar cada árbol
     'colsample_bytree': [0.6, 0.8, 1.0]     # Porcentaje de características usadas en cada árbol
 }
-
-xgb = XGBClassifier(use_label_encoder=False, eval_metric='logloss')  # Configuración inicial de XGBoost
-
-# RandomizedSearchCV para ajustar los parámetros
 random_search_xgb = RandomizedSearchCV(
     xgb, param_distributions=param_grid_xgb, n_iter=10, cv=3, scoring='roc_auc', n_jobs=-1, random_state=42
 )
